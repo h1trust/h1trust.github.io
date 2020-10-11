@@ -1,0 +1,68 @@
+---
+title: Rust Once, Run Everywhere
+date: 2019-10-25
+slug: "/rust-once-run-everywhere"
+tags:
+  - FFI
+---
+
+> Rust's quest for world domination was never destined to happen overnight, so Rust needs to be able to interoperate with the existing world just as easily as it talks to itself. For this reason, Rust makes it easy to communicate with C APIs without overhead, and to leverage its ownership system to provide much stronger safety guarantees for those APIs at the same time.
+
+To communicate with other languages, Rust provides a foreign function interface (FFI). Following Rust's design principles, the FFI provides a zero-cost abstraction where function calls between Rust and C have identical performance to C function calls. FFI bindings can also leverage language features such as ownership and borrowing to provide a safe interface that enforces protocols around pointers and other resources. These protocols usually appear only in the documentation for C APIs -- at best -- but Rust makes them explicit.
+
+Let's start with a simple example of calling C code from Rust and then demonstrate that Rust imposes no additional overhead. Here's a C program which will simply double all the input it's given:
+
+```c
+int double_input(int input) {
+    return input * 2;
+}
+```
+
+To call this from Rust, you might write a program like this:
+
+```c
+extern crate libc;
+
+extern {
+    fn double_input(input: libc::c_int) -> libc::c_int;
+}
+
+fn main() {
+    let input = 4;
+    let output = unsafe { double_input(input) };
+    println!("{} * 2 = {}", input, output);
+}
+```
+
+And that's it! You can try this out for yourself by checking out the code on GitHub and running cargo run from that directory. At the source level we can see that there's no burden in calling an external function beyond stating its signature, and we'll see soon that the generated code indeed has no overhead, either. There are, however, a few subtle aspects of this Rust program, so let's cover each piece in detail.
+
+First up we see extern crate libc. The libc crate provides many useful type definitions for FFI bindings when talking with C, and it makes it easy to ensure that both C and Rust agree on the types crossing the language boundary.
+
+This leads us nicely into the next part of the program:
+
+```c
+extern {
+    fn double_input(input: libc::c_int) -> libc::c_int;
+}
+```
+
+In Rust this is a declaration of an externally available function. You can think of this along the lines of a C header file. Here's where the compiler learns about the inputs and outputs of the function, and you can see above that this matches our definition in C. Next up we have the main body of the program:
+
+```c
+fn main() {
+    let input = 4;
+    let output = unsafe { double_input(input) };
+    println!("{} * 2 = {}", input, output);
+}
+```
+
+We see one of the crucial aspects of FFI in Rust here, the unsafe block. The compiler knows nothing about the implementation of double_input, so it must assume that memory unsafety could happen whenever you call a foreign function. The unsafe block is how the programmer takes responsibility for ensuring safety -- you are promising that the actual call you make will not, in fact, violate memory safety, and thus that Rust's basic guarantees are upheld. This may seem limiting, but Rust has just the right set of tools to allow consumers to not worry about unsafe (more on this in a moment).
+
+Now that we've seen how to call a C function from Rust, let's see if we can verify this claim of zero overhead. Almost all programming languages can call into C one way or another, but it often comes at a cost with runtime type conversions or perhaps some language-runtime juggling. To get a handle on what Rust is doing, let's go straight to the assembly code of the above main function's call to double_input:
+
+```
+mov    $0x4,%edi
+callq  3bc30 <double_input>
+```
+
+And as before, that's it! Here we can see that calling a C function from Rust involves precisely one call instruction after moving the arguments into place, exactly the same cost as it would be in C.
