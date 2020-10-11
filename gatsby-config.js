@@ -8,6 +8,10 @@ module.exports = {
   siteMetadata: {
     siteTitle:`Hirust`,
     siteTitleAlt: `Hitrust`,
+    siteHeadline: `Hitrust's Blog`,
+    siteUrl: `https://h1trust.github.io`,
+    siteDescription: 'Rustaceans from HIT',
+    author: `@raptazure`
   },
   plugins: [
     {
@@ -26,6 +30,10 @@ module.exports = {
           }
         ],
         externalLinks: [
+          {
+            name: 'RSS',
+            url:'https://h1trust.github.io/rss.xml'
+          },
           {
             name: `Twitter`,
             url: `https://twitter.com/h1trust`,
