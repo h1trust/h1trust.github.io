@@ -6,7 +6,7 @@ const shouldAnalyseBundle = process.env.ANALYSE_BUNDLE
 
 module.exports = {
   siteMetadata: {
-    siteTitle:`Hirust`,
+    siteTitle:`Hitrust`,
     siteTitleAlt: `Hitrust`,
     siteHeadline: `Hitrust's Blog`,
     siteUrl: `https://h1trust.github.io`,
@@ -18,7 +18,7 @@ module.exports = {
       resolve: `@lekoarts/gatsby-theme-minimal-blog`,
       // See the theme's README for all available options
       options: {
-        feedTitle: 'Hirust',
+        feedTitle: 'Hitrust',
         navigation: [
           {
             title: `Blog`,
@@ -42,6 +42,10 @@ module.exports = {
             name: `Discord`,
             url: `https://discord.com/invite/dHJCEsC`,
           },
+          {
+            name: `GitHub`,
+            url: `https://github.com/h1trust`
+          }
         ],
       },
     },
