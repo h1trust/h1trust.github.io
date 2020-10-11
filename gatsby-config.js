@@ -39,10 +39,6 @@ module.exports = {
             url: `https://twitter.com/h1trust`,
           },
           {
-            name: `Discord`,
-            url: `https://discord.com/invite/dHJCEsC`,
-          },
-          {
             name: `GitHub`,
             url: `https://github.com/h1trust`
           }
